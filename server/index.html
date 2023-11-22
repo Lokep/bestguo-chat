@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    .container {
+      max-width: 100vw !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container h-full min-h-screen w-2/3 mx-auto flex flex-col">
+    <div class="socket w-full shrink-0  pt-4 pb-2 h-6 box-content">
+      <div class="socket-id text-base empty:bg-slate-100 h-6 empty:w-36 rounded transition-background-color"></div>
+    </div>
+
+    <div id="content"
+      class="flex-1 w-full bg-slate-100 mb-4 rounded p-4 text-base focus-visible:outline-none text-slate-600"
+      contenteditable>
+    </div>
+
+    <div id="submit"
+      class="py-2 px-4 rounded shadow text-center text-sm w-24 fixed bottom-8 left-0 right-0 m-auto cursor-pointer select-none active:bg-blue-300 bg-blue-400 text-white">
+      发送
+    </div>
+
+  </div>
+
+
+  <script>
+    console.log(io)
+
+    const socket = io();
+
+
+    window.onload = function () {
+      const socketId = document.getElementsByClassName('socket-id')[0]
+      const submit = document.getElementById('submit')
+      const content = document.getElementById('content')
+
+
+      socket.on('chat', ({ msg, id }) => {
+        console.log(id, msg)
+
+        if (id !== socket.id) {
+          const originContent = content.innerText
+
+          content.innerText = `${originContent} \r\n ${id}: ${msg}`
+        }
+      })
+
+      socketId.innerText = `Socket ID: ${socket.id}`
+      submit.onclick = () => {
+        const msg = content.innerText
+
+        socket.emit('chat', {
+          msg,
+          id: socket.id
+        })
+      }
+    }
+  </script>
+</body>
+
+</html>
